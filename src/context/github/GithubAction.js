@@ -1,23 +1,18 @@
-import { useContext } from "react";
-import GithubContext from "./GithubContext";
+import axios from "axios";
 const REACT_APP_GITHUB_URL = "https://api.github.com";
 const REACT_APP_GITHUB_TOKEN = "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";
+
+const github = axios.create({
+  baseURL: REACT_APP_GITHUB_URL,
+  headers: { Authorization: `token ${REACT_APP_GITHUB_TOKEN}` },
+}); //in axios it direct give json data no need to .json and again await
 
 export const searchUsers = async function (text) {
   const params = new URLSearchParams({ q: text });
 
-  const response = await fetch(
-    `${REACT_APP_GITHUB_URL}/search/users?${params}`,
-    {
-      headers: {
-        Authorization: `token ${REACT_APP_GITHUB_TOKEN}`,
-      },
-    }
-  );
+  const response = await github.get(`/search/users?${params}`);
 
-  const { items } = await response.json();
-
-  return items;
+  return response.data.items;
 };
 
 export const getUser = async (login) => {

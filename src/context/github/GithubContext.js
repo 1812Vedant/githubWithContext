@@ -1,28 +1,87 @@
-import { createContext, useState } from "react";
+import { createContext, useReducer } from "react";
+import GithubReducer from "./GithubReducer";
+
 const REACT_APP_GITHUB_URL = "https://api.github.com";
-const REACT_APP_GITHUB_TOKEN = "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";
+const REACT_APP_GITHUB_TOKEN = "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";
 const GithubContext = createContext();
 
 //Provider have our global state and function related to global state
 export const GithubProvider = function ({ children }) {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const initialState = {
+    users: [],
+    user: {},
+    repos: [],
+    loading: false,
+  };
 
-  const fetchUsers = async function () {
-    const response = await fetch(`${REACT_APP_GITHUB_URL}/users`, {
+  const [state, dispatch] = useReducer(GithubReducer, initialState);
+  const setLoading = () => {
+    dispatch({ type: "SET_LOADING" });
+  };
+  //get search results
+
+  //Get single user
+  const getUser = async (login) => {
+    setLoading();
+    const response = await fetch(`${REACT_APP_GITHUB_URL}/users/${login}`, {
       headers: {
         Authorization: `token ${REACT_APP_GITHUB_TOKEN}`,
       },
     });
+    if (response.status === 404) {
+      window.location = "/notfound";
+    } else {
+      const data = await response.json();
+      dispatch({ type: "GET_USER", payload: data });
+    }
+  };
 
-    const data = await response.json();
+  //Get Repos
 
-    setUsers(data);
-    setLoading(false);
+  const getUserRepos = async function (login) {
+    setLoading();
+
+    const params = new URLSearchParams({
+      sort: "created",
+      per_page: 10,
+    });
+
+    const response = await fetch(
+      `${REACT_APP_GITHUB_URL}/users/${login}/repos?${params}`,
+      {
+        headers: {
+          Authorization: `token ${REACT_APP_GITHUB_TOKEN}`,
+        },
+      }
+    );
+
+    if (response.status === 404) {
+      window.location = "/notfound";
+    } else {
+      const data = await response.json();
+
+      dispatch({
+        type: "GET_REPOS",
+        payload: data,
+      });
+    }
+  };
+
+  //Clear Users
+  const clearUsers = function () {
+    dispatch({ type: "CLEAR_USERS" });
   };
 
   return (
-    <GithubContext.Provider value={{ users, loading, fetchUsers }}>
+    <GithubContext.Provider
+      value={{
+        clearUsers,
+        getUser,
+        getUserRepos,
+        ...state,
+        dispatch,
+      }}
+    >
       {children}
     </GithubContext.Provider>
   );

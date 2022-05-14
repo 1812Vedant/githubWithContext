@@ -21,63 +21,12 @@ export const GithubProvider = function ({ children }) {
   //get search results
 
   //Get single user
-  const getUser = async (login) => {
-    setLoading();
-    const response = await fetch(`${REACT_APP_GITHUB_URL}/users/${login}`, {
-      headers: {
-        Authorization: `token ${REACT_APP_GITHUB_TOKEN}`,
-      },
-    });
-    if (response.status === 404) {
-      window.location = "/notfound";
-    } else {
-      const data = await response.json();
-      dispatch({ type: "GET_USER", payload: data });
-    }
-  };
-
-  //Get Repos
-
-  const getUserRepos = async function (login) {
-    setLoading();
-
-    const params = new URLSearchParams({
-      sort: "created",
-      per_page: 10,
-    });
-
-    const response = await fetch(
-      `${REACT_APP_GITHUB_URL}/users/${login}/repos?${params}`,
-      {
-        headers: {
-          Authorization: `token ${REACT_APP_GITHUB_TOKEN}`,
-        },
-      }
-    );
-
-    if (response.status === 404) {
-      window.location = "/notfound";
-    } else {
-      const data = await response.json();
-
-      dispatch({
-        type: "GET_REPOS",
-        payload: data,
-      });
-    }
-  };
 
   //Clear Users
-  const clearUsers = function () {
-    dispatch({ type: "CLEAR_USERS" });
-  };
 
   return (
     <GithubContext.Provider
       value={{
-        clearUsers,
-        getUser,
-        getUserRepos,
         ...state,
         dispatch,
       }}

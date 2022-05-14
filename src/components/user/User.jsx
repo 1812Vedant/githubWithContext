@@ -5,17 +5,23 @@ import Spinner from "../Spinner";
 import RepoItem from "../repos/RepoItem";
 import RepoList from "../repos/RepoList";
 import GithubContext from "../../context/github/GithubContext";
-
+import { getUser, getUserRepos } from "../../context/github/GithubAction";
 function User() {
-  const { getUser, user, getUserRepos, loading, repos } =
-    useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
   const params = useParams();
-
+  //useEffect can't  be async so we create async function inside it
   useEffect(() => {
-    getUser(params.login);
-    getUserRepos(params.login);
-  }, []);
+    dispatch({ type: "SET_LOADING" });
+    const userData = async () => {
+      const userData = await getUser(params.login);
+      dispatch({ type: "GET_USER", payload: userData });
+
+      const userRepoData = await getUserRepos(params.login);
+      dispatch({ type: "GET_REPOS", payload: userRepoData });
+    };
+    userData();
+  }, [dispatch, params.login]);
   //if we add getUser and getUserRepos as dependencies then it will call useEffect when getUser will change
   //if getUser change then useEffect run then getUser will called then getUser again change then loop will never end
 

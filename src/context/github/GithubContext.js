@@ -1,8 +1,6 @@
 import { createContext, useReducer } from "react";
 import GithubReducer from "./GithubReducer";
 
-const REACT_APP_GITHUB_URL = "https://api.github.com";
-const REACT_APP_GITHUB_TOKEN = "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";
 const GithubContext = createContext();
 
 //Provider have our global state and function related to global state
